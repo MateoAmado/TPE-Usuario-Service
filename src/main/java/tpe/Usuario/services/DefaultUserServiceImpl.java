@@ -49,10 +49,15 @@ public class DefaultUserServiceImpl implements DefaultUserService {
 		String role = "USER";
 		if (usuario_dto.getRol().equals("ADMIN"))
 			role = "ADMIN";
-
+		if(usuario_dto.getRol().equals("ENCARGADO")){
+			role="ENCARGADO";
+		}
 		Usuario usuario = new Usuario();
 		usuario.setEmail(usuario_dto.getEmail());
 		usuario.setPassword(passwordEncoder.encode(usuario_dto.getPassword()));
+		usuario.setNombre(usuario_dto.getNombre());
+		usuario.setApellido(usuario_dto.getApellido());
+		usuario.setNro_celular(usuario_dto.getNro_celular());
 		usuario.setRol(role);
 
 		return this.usuario_repository.save(usuario);

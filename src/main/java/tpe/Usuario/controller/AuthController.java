@@ -71,6 +71,12 @@ public class AuthController {
 
 
 
+    @GetMapping("/rol")
+    public ResponseEntity<String> obtenerRol(@RequestBody UsuarioLoginDTO usuario){
+        return new ResponseEntity<>(usuario.getRol(), HttpStatus.OK);
+    }
+
+
     @PostMapping("/registro")
     public ResponseEntity<Object> registro(@RequestBody UsuarioRegistroDTO usuario_dto) {
         Usuario usuario = this.servicio_usuario.save(usuario_dto);

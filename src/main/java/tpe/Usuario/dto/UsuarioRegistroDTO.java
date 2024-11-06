@@ -1,7 +1,6 @@
 package tpe.Usuario.dto;
 
-import lombok.Data;
-@Data
+
 public class UsuarioRegistroDTO {
 
 
