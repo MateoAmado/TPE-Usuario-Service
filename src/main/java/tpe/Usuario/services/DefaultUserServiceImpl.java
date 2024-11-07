@@ -36,6 +36,9 @@ public class DefaultUserServiceImpl implements DefaultUserService {
 				mapRolesToAuthorities(usuario.getRol())
 		);
 	}
+	public Usuario findById(int id) {
+		return usuario_repository.findById(id);
+	}
 
 	public Collection<? extends GrantedAuthority> mapRolesToAuthorities(String rol) {
 		List<GrantedAuthority> authorities = new ArrayList<>();

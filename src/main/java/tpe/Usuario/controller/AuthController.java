@@ -76,6 +76,31 @@ public class AuthController {
         return new ResponseEntity<>(usuario.getRol(), HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> obtenerUsuario(@PathVariable int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        // Verificar que el encabezado de autorización esté presente y comience con "Bearer "
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>("Encabezado de autorización no válido", HttpStatus.BAD_REQUEST);
+        }
+
+        // Extraer el token del encabezado
+        String token = authorizationHeader.substring(7);
+        String username = jwt_utilidad.extractUsername(token);
+
+        // Verificar que el token sea válido
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (!jwt_utilidad.validateToken(token, userDetails)) {
+            return new ResponseEntity<>("Token no válido o caducado", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Buscar el usuario por ID en el repositorio
+        Usuario usuario = usuarioRepository.findById(id);
+        if (usuario == null) {
+            return new ResponseEntity<>("Usuario no encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(usuario, HttpStatus.OK);
+    }
 
     @PostMapping("/registro")
     public ResponseEntity<Object> registro(@RequestBody UsuarioRegistroDTO usuario_dto) {
