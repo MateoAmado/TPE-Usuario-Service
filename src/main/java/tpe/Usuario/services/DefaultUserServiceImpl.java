@@ -65,4 +65,31 @@ public class DefaultUserServiceImpl implements DefaultUserService {
 
 		return this.usuario_repository.save(usuario);
 	}
+
+	public void delete(Usuario usuario){
+		if(usuario != null) {
+			usuario_repository.delete(usuario);
+		}
+	}
+
+	public Usuario update(Usuario usuarioEncontrado, Usuario usuario){
+		if(usuario.getEmail() != null) {
+			usuarioEncontrado.setEmail(usuario.getEmail());
+		}
+		if(usuario.getApellido() != null) {
+			usuarioEncontrado.setApellido(usuario.getApellido());
+		}
+		if(usuario.getNombre() != null) {
+			usuarioEncontrado.setNombre(usuario.getNombre());
+		}
+		if(usuario.getPassword() != null) {
+			usuarioEncontrado.setPassword(passwordEncoder.encode(usuario.getPassword()));
+		}
+		if(usuario.getNro_celular() != usuarioEncontrado.getNro_celular()) {
+			usuarioEncontrado.setNro_celular(usuario.getNro_celular());
+		}
+
+		usuario_repository.save(usuarioEncontrado);
+		return usuarioEncontrado;
+	}
 }

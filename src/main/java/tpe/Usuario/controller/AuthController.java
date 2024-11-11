@@ -2,6 +2,7 @@ package tpe.Usuario.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import tpe.Usuario.dto.UsuarioLoginDTO;
 import tpe.Usuario.dto.UsuarioRegistroDTO;
 import tpe.Usuario.model.Usuario;
@@ -28,6 +29,7 @@ import java.util.Collections;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Auth", description = "API para autenticar y registrar Usuarios")
 public class AuthController {
     @Autowired
     AuthenticationManager authManager;
@@ -42,7 +44,7 @@ public class AuthController {
     DefaultUserService servicio_usuario;
 
     @Autowired
-    UsuarioRepository usuarioRepository;
+    DefaultUserService defaultUserService;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
@@ -84,9 +86,13 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Rol obtenido exitosamente"),
             @ApiResponse(responseCode = "400", description = "Error al obtener el rol")
     })
-    @GetMapping("/rol")
-    public ResponseEntity<String> obtenerRol(@RequestBody UsuarioLoginDTO usuario){
-        return new ResponseEntity<>(usuario.getRol(), HttpStatus.OK);
+    @GetMapping("/{id}/rol")
+    public ResponseEntity<String> obtenerRol(@PathVariable int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader){
+        Usuario usuario = defaultUserService.findById(id);
+        if(usuario != null) {
+            return new ResponseEntity<>(usuario.getRol(), HttpStatus.OK);
+        }else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @Operation(summary = "Obtener usuario por ID", description = "Obtiene la información de un usuario por su ID.")
@@ -97,23 +103,7 @@ public class AuthController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerUsuario(@PathVariable int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
-        // Verificar que el encabezado de autorización esté presente y comience con "Bearer "
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return new ResponseEntity<>("Encabezado de autorización no válido", HttpStatus.BAD_REQUEST);
-        }
-
-        // Extraer el token del encabezado
-        String token = authorizationHeader.substring(7);
-        String username = jwt_utilidad.extractUsername(token);
-
-        // Verificar que el token sea válido
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        if (!jwt_utilidad.validateToken(token, userDetails)) {
-            return new ResponseEntity<>("Token no válido o caducado", HttpStatus.UNAUTHORIZED);
-        }
-
-        // Buscar el usuario por ID en el repositorio
-        Usuario usuario = usuarioRepository.findById(id);
+        Usuario usuario = defaultUserService.findById(id);
         if (usuario == null) {
             return new ResponseEntity<>("Usuario no encontrado", HttpStatus.NOT_FOUND);
         }
@@ -160,6 +150,29 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return this.jwt_utilidad.generateToken(authentication);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Usuario> borrarUsuario(@PathVariable int id){
+        Usuario u = defaultUserService.findById(id);
+        if(u!=null){
+            defaultUserService.delete(u);
+            return new ResponseEntity<>(u, HttpStatus.NO_CONTENT);
+        }
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> updateUsuario(@PathVariable int id, @RequestBody Usuario usuario){
+        Usuario u = defaultUserService.findById(id);
+        if(u!=null){
+            Usuario actualizado = defaultUserService.update(u, usuario);
+            return new ResponseEntity<>(actualizado, HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
     }
 
 
