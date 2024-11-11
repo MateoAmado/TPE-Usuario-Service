@@ -1,4 +1,7 @@
 package tpe.Usuario.controller;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tpe.Usuario.dto.UsuarioLoginDTO;
 import tpe.Usuario.dto.UsuarioRegistroDTO;
 import tpe.Usuario.model.Usuario;
@@ -44,6 +47,12 @@ public class AuthController {
     private BCryptPasswordEncoder passwordEncoder;
 
 
+    @Operation(summary = "Validar token", description = "Valida el token JWT proporcionado.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token válido"),
+            @ApiResponse(responseCode = "400", description = "Encabezado de autorización inválido"),
+            @ApiResponse(responseCode = "401", description = "Token inválido")
+    })
     @PostMapping("/validateToken")
     public ResponseEntity<?> validateToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -70,12 +79,22 @@ public class AuthController {
     }
 
 
-
+ @Operation(summary = "Obtener rol de usuario", description = "Obtiene el rol de un usuario.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Rol obtenido exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Error al obtener el rol")
+    })
     @GetMapping("/rol")
     public ResponseEntity<String> obtenerRol(@RequestBody UsuarioLoginDTO usuario){
         return new ResponseEntity<>(usuario.getRol(), HttpStatus.OK);
     }
 
+    @Operation(summary = "Obtener usuario por ID", description = "Obtiene la información de un usuario por su ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+            @ApiResponse(responseCode = "401", description = "Token no válido o caducado")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerUsuario(@PathVariable int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         // Verificar que el encabezado de autorización esté presente y comience con "Bearer "
@@ -102,6 +121,11 @@ public class AuthController {
         return new ResponseEntity<>(usuario, HttpStatus.OK);
     }
 
+    @Operation(summary = "Registro de un nuevo usuario", description = "Registra un nuevo usuario en el sistema.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Error en el registro del usuario")
+    })
     @PostMapping("/registro")
     public ResponseEntity<Object> registro(@RequestBody UsuarioRegistroDTO usuario_dto) {
         Usuario usuario = this.servicio_usuario.save(usuario_dto);
@@ -113,6 +137,11 @@ public class AuthController {
     }
 
 
+    @Operation(summary = "Inicio de sesión", description = "Permite a un usuario iniciar sesión en el sistema.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Inicio de sesión exitoso"),
+            @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
+    })
     @PostMapping("/login")
     public String login(@RequestBody UsuarioLoginDTO usuario_dto) {
             Authentication authentication = authManager.authenticate(
@@ -132,6 +161,7 @@ public class AuthController {
 
         return this.jwt_utilidad.generateToken(authentication);
     }
+
 
 
 
