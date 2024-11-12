@@ -17,15 +17,12 @@ public class Usuario {
     private int id;
     private String password;
     private String email;
-
     private String apellido;
-
     private String nombre;
-
     private int nro_celular;
     private String rol;
-
-
+    private Long longitud;
+    private Long latitud;
 }
 
 

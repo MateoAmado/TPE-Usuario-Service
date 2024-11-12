@@ -3,6 +3,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tpe.Usuario.dto.UbicacionDTO;
 import tpe.Usuario.dto.UsuarioLoginDTO;
 import tpe.Usuario.dto.UsuarioRegistroDTO;
 import tpe.Usuario.model.Usuario;
@@ -95,6 +96,21 @@ public class AuthController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Operation(summary = "Obtiene la ubicacion del usuario", description = "Obtiene la longitud y la latitud donde se encuentra el usuario.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ubicacion obtenido exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Error al obtener el ubicacion")
+    })
+    @GetMapping("/{id}/ubicacion")
+    public ResponseEntity<UbicacionDTO> obtenerUbicacion(@PathVariable int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader){
+        Usuario usuario = defaultUserService.findById(id);
+        if(usuario != null) {
+            UbicacionDTO ubicacion= new UbicacionDTO(usuario.getLongitud(), usuario.getLatitud());
+            return new ResponseEntity<>(ubicacion, HttpStatus.OK);
+        }else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @Operation(summary = "Obtener usuario por ID", description = "Obtiene la información de un usuario por su ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
@@ -152,6 +168,12 @@ public class AuthController {
         return this.jwt_utilidad.generateToken(authentication);
     }
 
+
+    @Operation(summary = "Borrar un usuario", description = "Elimina un usuario del sistema.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Operación exitosa"),
+            @ApiResponse(responseCode = "404", description = "Error en intentar borrar el usuario")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Usuario> borrarUsuario(@PathVariable int id){
         Usuario u = defaultUserService.findById(id);
@@ -163,6 +185,12 @@ public class AuthController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+
+    @Operation(summary = "Modificar los datos de un usuario", description = "Modifica los datos o el dato que desea un usuario.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Se modificó con exito"),
+            @ApiResponse(responseCode = "404", description = "No se logró modificar con exito")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<Usuario> updateUsuario(@PathVariable int id, @RequestBody Usuario usuario){
         Usuario u = defaultUserService.findById(id);
