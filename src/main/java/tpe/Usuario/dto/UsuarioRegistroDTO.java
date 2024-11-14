@@ -11,16 +11,21 @@ public class UsuarioRegistroDTO {
     private String apellido;
     private int nro_celular;
 
+    private Long longitud;
+    private Long latitud;
+
     public UsuarioRegistroDTO(){
     }
 
-    public UsuarioRegistroDTO(String password, String email, String rol, String nombre, String apellido, int nro_celular){
+    public UsuarioRegistroDTO(String password, String email, String rol, String nombre, String apellido, int nro_celular, Long longitud, Long latitud){
         this.password = password;
         this.email = email;
         this.rol = rol;
         this.nombre = nombre;
         this.apellido = apellido;
         this.nro_celular = nro_celular;
+        this.latitud = latitud;
+        this.longitud = longitud;
     }
 
     public String getPassword() {
@@ -69,6 +74,22 @@ public class UsuarioRegistroDTO {
 
     public void setNro_celular(int nro_celular) {
         this.nro_celular = nro_celular;
+    }
+
+    public Long getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(Long longitud) {
+        this.longitud = longitud;
+    }
+
+    public Long getLatitud() {
+        return latitud;
+    }
+
+    public void setLatitud(Long latitud) {
+        this.latitud = latitud;
     }
 }
 

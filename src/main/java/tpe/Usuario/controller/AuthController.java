@@ -3,7 +3,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import tpe.Usuario.dto.UbicacionDTO;
 import tpe.Usuario.dto.UsuarioLoginDTO;
 import tpe.Usuario.dto.UsuarioRegistroDTO;
 import tpe.Usuario.model.Usuario;
@@ -46,8 +45,7 @@ public class AuthController {
 
     @Autowired
     DefaultUserService defaultUserService;
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+
 
 
     @Operation(summary = "Validar token", description = "Valida el token JWT proporcionado.")
@@ -70,11 +68,9 @@ public class AuthController {
 
         if (isValid) {
             String role = userDetails.getAuthorities().stream()
-                    .findFirst() // Suponiendo que solo hay un rol
+                    .findFirst()
                     .map(GrantedAuthority::getAuthority)
-                    .orElse("ROLE_USER"); // Valor por defecto si no se encuentra rol
-
-            // Retornar el rol y mensaje de token válido
+                    .orElse("ROLE_USER");
             return ResponseEntity.ok(Collections.singletonMap("role", role));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
@@ -82,7 +78,7 @@ public class AuthController {
     }
 
 
- @Operation(summary = "Obtener rol de usuario", description = "Obtiene el rol de un usuario.")
+    @Operation(summary = "Obtener rol de usuario", description = "Obtiene el rol de un usuario.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rol obtenido exitosamente"),
             @ApiResponse(responseCode = "400", description = "Error al obtener el rol")
@@ -92,21 +88,6 @@ public class AuthController {
         Usuario usuario = defaultUserService.findById(id);
         if(usuario != null) {
             return new ResponseEntity<>(usuario.getRol(), HttpStatus.OK);
-        }else
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @Operation(summary = "Obtiene la ubicacion del usuario", description = "Obtiene la longitud y la latitud donde se encuentra el usuario.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ubicacion obtenido exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Error al obtener el ubicacion")
-    })
-    @GetMapping("/{id}/ubicacion")
-    public ResponseEntity<UbicacionDTO> obtenerUbicacion(@PathVariable int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader){
-        Usuario usuario = defaultUserService.findById(id);
-        if(usuario != null) {
-            UbicacionDTO ubicacion= new UbicacionDTO(usuario.getLongitud(), usuario.getLatitud());
-            return new ResponseEntity<>(ubicacion, HttpStatus.OK);
         }else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -129,7 +110,7 @@ public class AuthController {
 
     @Operation(summary = "Registro de un nuevo usuario", description = "Registra un nuevo usuario en el sistema.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
+            @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente"),
             @ApiResponse(responseCode = "400", description = "Error en el registro del usuario")
     })
     @PostMapping("/registro")
@@ -139,7 +120,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No fue posible guardar el usuario.");
         }
 
-        return ResponseEntity.ok(usuario);
+        return new ResponseEntity<>(usuario, HttpStatus.CREATED);
     }
 
 
@@ -150,29 +131,19 @@ public class AuthController {
     })
     @PostMapping("/login")
     public String login(@RequestBody UsuarioLoginDTO usuario_dto) {
-            Authentication authentication = authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(usuario_dto.getEmail(), usuario_dto.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            return this.jwt_utilidad.generateToken(authentication);
-
-
-    }
-
-
-    @PostMapping("/genToken")
-    public String get_token(@RequestBody UsuarioLoginDTO usuario_dto) throws Exception {
         Authentication authentication = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(usuario_dto.getEmail(), usuario_dto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         return this.jwt_utilidad.generateToken(authentication);
+
+
     }
 
 
-    @Operation(summary = "Borrar un usuario", description = "Elimina un usuario del sistema.")
+    @Operation(summary = "Eliminar un usuario", description = "Elimina un usuario de la base de datos")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Operación exitosa"),
-            @ApiResponse(responseCode = "404", description = "Error en intentar borrar el usuario")
+            @ApiResponse(responseCode = "204", description = "Usuario eliminado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Error al intentar eliminar el usuario")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Usuario> borrarUsuario(@PathVariable int id){
@@ -185,11 +156,10 @@ public class AuthController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-
-    @Operation(summary = "Modificar los datos de un usuario", description = "Modifica los datos o el dato que desea un usuario.")
+    @Operation(summary = "Modificar datos de un usuario", description = "Modificar los datos de un usuario")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Se modificó con exito"),
-            @ApiResponse(responseCode = "404", description = "No se logró modificar con exito")
+            @ApiResponse(responseCode = "200", description = "Datos modificados exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Error al modificar los datos")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Usuario> updateUsuario(@PathVariable int id, @RequestBody Usuario usuario){
