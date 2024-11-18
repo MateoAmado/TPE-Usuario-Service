@@ -3,6 +3,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tpe.Usuario.dto.UbicacionDTO;
 import tpe.Usuario.dto.UsuarioLoginDTO;
 import tpe.Usuario.dto.UsuarioRegistroDTO;
 import tpe.Usuario.model.Usuario;
@@ -107,6 +108,22 @@ public class AuthController {
 
         return new ResponseEntity<>(usuario, HttpStatus.OK);
     }
+
+    @Operation(summary = "Obtiene la ubicacion del usuario", description = "Obtiene la longitud y la latitud donde se encuentra el usuario.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ubicacion obtenido exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Error al obtener el ubicacion")
+    })
+    @GetMapping("/{id}/ubicacion")
+    public ResponseEntity<UbicacionDTO> obtenerUbicacion(@PathVariable int id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader){
+        Usuario usuario = defaultUserService.findById(id);
+        if(usuario != null) {
+            UbicacionDTO ubicacion= new UbicacionDTO(usuario.getLongitud(), usuario.getLatitud());
+            return new ResponseEntity<>(ubicacion, HttpStatus.OK);
+        }else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
 
     @Operation(summary = "Registro de un nuevo usuario", description = "Registra un nuevo usuario en el sistema.")
     @ApiResponses(value = {
