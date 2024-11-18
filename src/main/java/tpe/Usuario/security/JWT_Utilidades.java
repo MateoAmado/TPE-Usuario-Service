@@ -65,6 +65,7 @@ public class JWT_Utilidades {
 	private String createToken(Map<String, Object> claims, Authentication authentication) {
 		String role = authentication.getAuthorities().stream().map(r -> r.getAuthority()).collect(Collectors.toSet())
 				.iterator().next();
+		claims.put("role", role);
 		return Jwts.builder()
 				.claim("role", role)
 				.setClaims(claims)
@@ -85,7 +86,7 @@ public class JWT_Utilidades {
 		Claims claims = extractAllClaims(token);
 
 		final Collection<? extends GrantedAuthority> authorities = Arrays
-				.stream(claims.get("rol").toString().split(",")).map(SimpleGrantedAuthority::new)
+				.stream(claims.get("role").toString().split(",")).map(SimpleGrantedAuthority::new)
 				.collect(Collectors.toList());
 
 		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
