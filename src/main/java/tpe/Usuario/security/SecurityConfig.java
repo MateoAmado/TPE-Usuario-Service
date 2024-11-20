@@ -1,5 +1,6 @@
 package tpe.Usuario.security;
 
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import tpe.Usuario.services.DefaultUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -55,14 +56,14 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(    "/v3/api-docs/**",
 								"/swagger-ui/**",
-								"/swagger-ui.html","/auth/login","/auth/{id}","/auth/{id}/ubicacion","/auth/{id}/rol", "/auth/validateToken", "/error", "/auth/registro", "/auth/genToken").permitAll()
+								"/swagger-ui.html","/auth/login", "/auth/validateToken", "/error", "/auth/registro").permitAll()
 						.anyRequest().authenticated()
 				)
 				.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		// Añadir filtro de autenticación JWT
-		//http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}

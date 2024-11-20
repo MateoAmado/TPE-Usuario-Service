@@ -62,6 +62,8 @@ public class DefaultUserServiceImpl implements DefaultUserService {
 		usuario.setApellido(usuario_dto.getApellido());
 		usuario.setNro_celular(usuario_dto.getNro_celular());
 		usuario.setRol(role);
+		usuario.setLatitud(usuario_dto.getLatitud());
+		usuario.setLongitud(usuario_dto.getLongitud());
 
 		return this.usuario_repository.save(usuario);
 	}
